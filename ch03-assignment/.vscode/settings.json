@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "slist.h": "c",
+        "string.h": "c",
+        "pages.h": "c",
+        "bmap.h": "c",
+        "mman.h": "c",
+        "types.h": "c",
+        "unistd.h": "c",
+        "assert.h": "c"
+    }
+}

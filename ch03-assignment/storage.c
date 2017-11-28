@@ -3,19 +3,19 @@
 
 #include "storage.h"
 
-superBlock sb;
-
-
-static file_data file_table[] = {
-    {"/", 040755, 0},
-    {"/hello.txt", 0100644, "hello\n"},
-    {0, 0, 0},
-};
+size_t PAGE_SIZE = 4096;
+superBlock* sb;
 
 void
 storage_init(const char* path)
 {
     printf("TODO: Store file system data in: %s\n", path);
+    sb = mmap(0, PAGE_SIZE * 256, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0); // split up into 4k chunks
+    sb->dataBlockMap_offset = PAGE_SIZE * 1; // 4096
+    sb->myNodeMap_offset = PAGE_SIZE * 2; // 8192
+    sb->myNodeTable_offset = PAGE_SIZE * 3; // 12288
+    (size_t) (sb + sb->dataBlockMap_offset) = createBitMap();
+    (size_t) (sb + sb->dataBlockMap_offset) = createBitMap();
 }
 
 static int

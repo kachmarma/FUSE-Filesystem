@@ -1,13 +1,11 @@
 //
 // Created by Julian Hirn on 11/27/17.
 //
-
 #include "bmap.h"
-#include <stdlib.h>
 
-bmap createBitMap() {
-        bmap newMap = calloc(sizeof(bmap));
-        return newMap;
+bmap createBitMap(void* location) {
+       bmap* bmap = (bmap *)location;
+       return *bmap;
 }
 
 void freeBitMap(bmap* bitmap)

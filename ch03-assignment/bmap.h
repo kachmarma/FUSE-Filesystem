@@ -2,17 +2,33 @@
 // Created by Julian Hirn on 11/27/17.
 //
 
+#include <string.h>
+
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <assert.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <stdio.h>
+
+#include "pages.h"
+
+#include "bmap.h"
+#include <stdlib.h>
+
 #ifndef CH03_BMAP_H
 #define CH03_BMAP_H
 typedef struct bmap {
     long data[4];
-};
+} bmap;
 
 /**
  * Create new bitmap.
  * @return the newly created bitmap.
  */
-bmap createBitMap();
+bmap createBitMap(void* location);
 
 /**
  * Free the bitmap.
