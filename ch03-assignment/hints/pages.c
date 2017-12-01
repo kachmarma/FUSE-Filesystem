@@ -22,20 +22,7 @@ const int PAGE_SIZE = 4096;
 static int   pages_fd   = -1;
 static void* pages_base =  0;
 
-void
-pages_init(const char* path)
-{
-    pages_fd = open(path, O_CREAT | O_RDWR, 0644);
-    assert(pages_fd != -1);
-
-    int rv = ftruncate(pages_fd, NUFS_SIZE);
-    assert(rv == 0);
-
-    pages_base = mmap(0, NUFS_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, pages_fd, 0);
-    assert(pages_base != MAP_FAILED);
-    // stages init
-    storage_init(pages_base);
-}
+superBlock* sb;
 
 void
 pages_free()
@@ -71,6 +58,44 @@ pages_find_empty()
     return pnum;
 }
 
+// mode:
+//  0 = directory
+//  1 = file
+int
+createMyNode(const char* path, int mode, int uid, size_t dataSize, enum myFlag flag)
+{
+    // SCAN inode bitmap
+    bmap* nodeMap = (bmap*) pages_get_page(sb->myNodeTable_pnum);
+    int index = setFirstAvailable(nodeMap);
+    if (index < 0) {
+        perror("No free myNodes");
+    }
+    myNode* myNode = pages_get_node(index, sb->myNodeTable_pnum);
+    // fill in myNode data
+    unsigned long nowTime = (unsigned long) time(NULL);
+    myNode->fileData = (file_data) { path, mode, uid, dataSize, nowTime, nowTime, 1, (int) ceil(dataSize / 4096), flag };
+
+
+    // figure out size things
+    int pages_needed = ceil(dataSize / PAGE_SIZE);
+    if (dataSize <= PAGE_SIZE * 12) {
+        // use direct pointer(s)
+
+        //TODO: getBitmap and map pages
+        for (int i = 0; i < pages_needed; i++) {
+            int mapEntry = setFirstAvailable(pages_get_page(sb->dataBlockMap_pnum));
+            if (mapEntry < 0) {
+                perror("No free data blocks.");
+            }
+            myNode->dataBlockNumber[i] = mapEntry;
+        }
+    
+    } else {
+        // use indirect pointers
+        
+    }
+}
+
 // TODO
 void
 print_node(myNode* node)
@@ -85,16 +110,33 @@ print_node(myNode* node)
 }
 
 void
+pages_init(const char* path)
+{
+    pages_fd = open(path, O_CREAT | O_RDWR, 0644);
+    assert(pages_fd != -1);
+
+    int rv = ftruncate(pages_fd, NUFS_SIZE);
+    assert(rv == 0);
+
+    pages_base = mmap(0, NUFS_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, pages_fd, 0);
+    assert(pages_base != MAP_FAILED);
+    // stages init
+    storage_init(pages_base);
+}
+
+void
 storage_init(void* pages_base)
 {
-    superBlock sb = superBlock_init(pages_base);
-    sb.myNodeMap_offset = PAGE_SIZE * 1; // 4096
-    sb.dataBlockMap_offset = PAGE_SIZE * 1; // 4096
-    sb.rootMyNode_offset = PAGE_SIZE * 2; // 8192
-    sb.myNodeTable_offset = PAGE_SIZE * 3; // 12288
-    bmap myNodeMap = createBitMap((void*) ((size_t) &sb + (size_t) sb.myNodeMap_offset));
-    bmap myDataMap = createBitMap((void*) ((size_t) &sb + (size_t) sb.myDataMap_offset));
-    myNode rootMyNode = createMyNode((void*) ((size_t) &sb + (size_t) sb.rootMyNode_offset));
+    *sb = superBlock_init(pages_base);
+    sb->myNodeMap_pnum = 1;
+    sb->dataBlockMap_pnum = 2;
+    sb->myNodeTable_pnum = 3;
+    bmap myNodeMap = createBitMap(pages_get_page(sb->myNodeMap_pnum));
+    bmap myDataMap = createBitMap(pages_get_page(sb->dataBlockMap_pnum));
+    // create the root inode
+    if (createMyNode() < 0) {
+        perror("Failed to create root myNode");
+    }
 }
 
 superBlock
@@ -157,5 +199,3 @@ get_data(const char* path)
 
     return dat->data;
 }
-
-

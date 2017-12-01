@@ -8,6 +8,8 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include "bmap.h"
+#include <math.h>
+#include <time.h>
 
 // flags for file Data
 enum myFlag {
@@ -23,15 +25,15 @@ enum myFlag {
 
 // important file/directory Data
 typedef struct file_data {
-    const char* path;
-    int         mode;
-    int         uid;
-    size_t      dataSize;
-    int         createTime;
-    int         modTime;
-    int         ref_count;
-    int         blockCount;
-    enum myFlag flag;
+    const char*           path;
+    int                   mode;
+    int                   uid;
+    size_t                dataSize;
+    unsigned long         createTime;
+    unsigned long         modTime;
+    int                   ref_count;
+    int                   blockCount;
+    enum myFlag           flag;
 } file_data;
 
 // points to 1024 data Blocks
@@ -41,17 +43,17 @@ typedef struct indiBlock {
 
 // represents an iNode containing important file data and pointers to data Blocks
 typedef struct myNode {
-    file_data data;                  // contains important file data
-    size_t dataBlockOffsets[12];     // assigned directly to data blocks
+    file_data fileData;                  // contains important file data
+    size_t dataBlockNumber[12];     // assigned directly to data blocks
     size_t indiBlock;  // pointer to indirect blocks
 } myNode;
 
 // contains important file system pointers
+// by default, root inode is the first myNode
 typedef struct superBlock {
-    size_t myNodeMap_offset; // bit map of free and used data block
-    size_t dataBlockMap_offset; // bit map of free and used inodes
-    size_t rootMyNode_offset; // the root inode offset in bytes
-    size_t myNodeTable_offset; // the table of 256 myNodes
+    size_t myNodeMap_pnum; // page number of bit map of free and used data block
+    size_t dataBlockMap_pnum; // page number of bit map of free and used inodes
+    size_t myNodeTable_pnum; // page numeber of the table of 256 myNodes
 } superBlock;
 
 void storage_init(void* pages_base);

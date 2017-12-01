@@ -3,7 +3,6 @@
 //
 
 #include <string.h>
-
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -14,8 +13,6 @@
 #include <stdio.h>
 
 #include "pages.h"
-
-#include "bmap.h"
 #include <stdlib.h>
 
 #ifndef CH03_BMAP_H
