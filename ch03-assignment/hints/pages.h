@@ -45,7 +45,7 @@ typedef struct indiBlock {
 typedef struct myNode {
     file_data fileData;                  // contains important file data
     size_t dataBlockNumber[12];     // assigned directly to data blocks
-    size_t indiBlock;  // pointer to indirect blocks
+    size_t indiBlock[12][12];  // pointer to indirect blocks
 } myNode;
 
 // contains important file system pointers

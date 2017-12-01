@@ -92,7 +92,16 @@ createMyNode(const char* path, int mode, int uid, size_t dataSize, enum myFlag f
     
     } else {
         // use indirect pointers
-        
+        int outterBlocks = (int) (ceil(pages_needed / 12));
+        for (int i = 0; i < outterBlocks; i++) {
+             for (int z = 0; z < 12; z++) {
+                int mapEntry = setFirstAvailable(pages_get_page(sb->dataBlockMap_pnum));
+                if (mapEntry < 0) {
+                    perror("No free data blocks.");
+                }
+                myNode->dataBlockNumber[z] = mapEntry;
+            }
+        }
     }
 }
 
