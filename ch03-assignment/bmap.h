@@ -17,8 +17,9 @@
 
 #ifndef CH03_BMAP_H
 #define CH03_BMAP_H
+
 typedef struct bmap {
-    long data[4];
+    int data[8];
 } bmap;
 
 /**
@@ -46,5 +47,10 @@ int setFirstAvailable(bmap* bitmap);
  * @param i index to clear in the bitmap.
  */
 void clearBit(bmap* bitmap, int i);
+
+/**
+ * Print the bitmap. 
+ */
+void printBitMap(bmap* bitmap);
 
 #endif //CH03_BMAP_H

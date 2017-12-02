@@ -116,14 +116,16 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
 
     } else {
         // use indirect pointers
+        int left = pages_needed;
         int outterBlocks = (int) (ceil(pages_needed / 12));
         for (int i = 0; i < outterBlocks; i++) {
-            for (int z = 0; z < 12; z++) {
+            for (int z = 0; z < min(12, left); z++) {
                 int mapEntry = setFirstAvailable(pages_get_page(sb->dataBlockMap_pnum));
                 if (mapEntry < 0) {
                     perror("No free data blocks.");
                 }
-                inode->dataBlockNumber[z] = mapEntry;
+                inode->indiBlock[i][z] = mapEntry;
+                left--;
             }
         }
     }
@@ -135,7 +137,7 @@ print_node(inode* node)
 {
     if (node) {
         printf("node{refs: %d, mode: %04o, size: %d, xtra: %d}\n",
-               node->refs, node->mode, node->size, node->xtra);
+               node->ref_count, node->mode, node->dataSize, node->blockCount); 
     }
     else {
         printf("node{null}\n");
@@ -266,6 +268,5 @@ get_data(const char* path)
     if (!dat) {
         return 0;
     }
-
     return dat->data;
 }
