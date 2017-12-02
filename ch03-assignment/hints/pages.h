@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
-#include "bmap.h"
+#include "../bmap.h"
 #include <math.h>
 #include <time.h>
 
