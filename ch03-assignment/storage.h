@@ -11,8 +11,6 @@
 #include <math.h>
 #include <time.h>
 
-
-
 typedef struct pathToNode {
     const char* fileName[256];
     int nodeNumber[256];

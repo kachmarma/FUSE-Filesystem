@@ -4,8 +4,8 @@
 #include "bmap.h"
 
 bmap createBitMap(void* location) {
-       bmap* bmap = (bmap *)location;
-       return *bmap;
+        bmap* bmap = (bmap *)location;
+        return *bmap;
 }
 
 void freeBitMap(bmap* bitmap)
@@ -48,7 +48,7 @@ int getIntNum(int n)
         if (n < 0 || n > 255) {
                 perror("");
         }
-        return ceil(n * 8 / 256);
+        return (int)ceil(n * 8 / 256);
 }
 
 void clearBit(bmap* bitmap, int i)
@@ -64,7 +64,7 @@ void printBitMap(bmap* bitmap)
 {
         for(int i = 0; i < 3; i++) {
                 for(int z = 31; z >= 0; z--) {
-                        printf(getBit(bitmap->data[i], z));
+                        printf("%d", getBit(bitmap->data[i], z));
                 }
         }
 }

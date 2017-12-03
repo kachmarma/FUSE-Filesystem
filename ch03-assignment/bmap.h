@@ -11,8 +11,8 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
+#include <math.h>
 
-#include "pages.h"
 #include <stdlib.h>
 
 #ifndef CH03_BMAP_H
