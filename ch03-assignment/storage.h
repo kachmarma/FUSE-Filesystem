@@ -11,6 +11,21 @@
 #include <math.h>
 #include <time.h>
 
+
+
+typedef struct pathToNode {
+    const char* fileName[256];
+    int nodeNumber[256];
+} pathToNode;
+
+void
+initPathToNode();
+
+void
+printAll();
+
+inode* retrieve_inode(const char* path);
+
 /**
  * Flags for file data.
  */
@@ -56,6 +71,7 @@ typedef struct superBlock {
     size_t inodeMap_pnum; // page number of bit map of free and used data block
     size_t dataBlockMap_pnum; // page number of bit map of free and used inodes
     size_t inodeTable_pnum; // page numeber of the table of 256 inodes
+    size_t pathToNode_pnum; // page number of the mapping of paths to nodes
 } superBlock;
 
 void storage_init(void* pages_base);

@@ -21,6 +21,38 @@ static void* pages_base =  0;
 
 superBlock* sb;
 
+void
+initPathToNode()
+{
+    pathToNode* pathToNode = (pathToNode*) pages_get_page(sb->pathToNode_pnum);
+    for (int i = 0; i < 256; i++) {
+        pathToNode->fileName[i] = "";
+        pathToNode->nodeNumber[i] = -1;
+    }
+}
+
+int get_inode_index(const char* path)
+{
+    pathToNode* pathToNode = (pathToNode*) pages_get_page(sb->pathToNode_pnum);
+    for (int i = 0; i < 256; i++)
+    {
+        if (streq(pathToNode->fileName[i], path))
+        {
+            return i;
+        }
+    }
+    
+    perror("No inode found for given path: %s\n", path);
+    return -1;
+}
+
+inode* retrieve_inode(const char* path)
+{
+    int inode_index = get_inode_index(path);
+    return pages_get_inode(pathToNode[i], sb->inodeTable_pnum);
+}
+
+
 /**
  * Free the allocated pages.
  */
@@ -95,6 +127,24 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
         perror("No free inodes");
     }
     inode* inode = pages_get_node(index, sb->inodeTable_pnum);
+
+    // assign path to inode number
+    pathToNode* pathToNode = (pathToNode*) pages_get_page(sb->pathToNode_pnum);
+    for (int i = 0; i < 256; i++)
+    {
+        if (pathToNode->nodeNumber[i] == -1)
+        {
+            pathToNode->nodeNumber[i] = index;
+            pathToNode->fileName[i] = strdup(path);
+        }
+
+        if (i == 255) {
+            perror("Unable to find free location for file");
+            break;
+        }
+
+    }
+
     // fill in inode data
     unsigned long nowTime = (unsigned long) time(NULL);
     inode->fileData = (file_data) { path, mode, uid, dataSize, nowTime, nowTime, 1, (int) ceil(dataSize / 4096), flag };
@@ -131,6 +181,20 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
     }
 }
 
+void
+printAll()
+{
+    pathToNode* pathToNode = (pathToNode*) pages_get_page(sb->pathToNode_pnum);
+    for (int i = 0; i < 256; i++)
+    {
+        if (pathToNode->nodeNumber[i] != -1)
+        {
+            printf("%s", pathToNode->fileName[i]);
+            print_node(pages_get_node(pathToNode->nodeNumber[i], sb->inodeTable_pnum));
+        }
+    }
+}
+
 // TODO
 void
 print_node(inode* node)
@@ -160,6 +224,7 @@ pages_init(const char* path)
     pages_base = mmap(0, NUFS_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, pages_fd, 0);
     assert(pages_base != MAP_FAILED);
     // stages init
+    initPathToNode();
     storage_init(pages_base);
 }
 
@@ -174,6 +239,7 @@ storage_init(void* pages_base)
     sb->inodeMap_pnum = 1;
     sb->dataBlockMap_pnum = 2;
     sb->inodeTable_pnum = 3;
+    sb->pathToNode_pnum = 4;
     bmap inodeMap = createBitMap(pages_get_page(sb->inodeMap_pnum));
     bmap myDataMap = createBitMap(pages_get_page(sb->dataBlockMap_pnum));
     // create the root inode
@@ -239,20 +305,22 @@ get_file_data(const char* path) {
 int
 get_stat(const char* path, struct stat* st)
 {
-    file_data* dat = get_file_data(path);
-    if (!dat) {
+    
+    inode* node = retrieve_inode(path);
+    if (!node) {
         return -1;
     }
 
+    file_data* dat = node->fileData;
+
     memset(st, 0, sizeof(struct stat));
-    st->st_uid  = getuid();
+    st->st_dev = 1;
+    st->st_ino = get_inode_index(path);
     st->st_mode = dat->mode;
-    if (dat->data) {
-        st->st_size = strlen(dat->data);
-    }
-    else {
-        st->st_size = 0;
-    }
+    st->st_nlink = -1; // TODO update this.
+    st->st_uid  = dat->uid;
+
+    st->st_size = dat->dataSize;
     return 0;
 }
 
