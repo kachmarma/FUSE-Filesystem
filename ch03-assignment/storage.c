@@ -297,10 +297,10 @@ get_file_data(const char* path) {
 
 
 /**
- * idk, TODO what does this do
- * @param path ??
- * @param st ??
- * @return ??
+ * Gets the stats for the given path.
+ * @param path the given path
+ * @param st the struct to fill with stats
+ * @return on success
  */
 int
 get_stat(const char* path, struct stat* st)
@@ -311,16 +311,19 @@ get_stat(const char* path, struct stat* st)
         return -1;
     }
 
-    file_data* dat = node->fileData;
+    file_data dat = node->fileData;
 
     memset(st, 0, sizeof(struct stat));
     st->st_dev = 1;
     st->st_ino = get_inode_index(path);
-    st->st_mode = dat->mode;
+    st->st_mode = dat.mode;
     st->st_nlink = -1; // TODO update this.
-    st->st_uid  = dat->uid;
-
-    st->st_size = dat->dataSize;
+    st->st_uid  = dat.uid;
+    st->st_gid = dat.uid;
+    st->st_rdev = -1;
+    st->st_size = dat.dataSize;
+    st->st_blksize = PAGE_SIZE;
+    st->st_blocks = dat.blockCount;
     return 0;
 }
 
