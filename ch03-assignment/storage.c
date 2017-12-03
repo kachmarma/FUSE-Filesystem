@@ -24,7 +24,7 @@ superBlock* sb;
 void
 initPathToNode()
 {
-    pathToNode* pathToNode = (pathToNode*) pages_get_page(sb->pathToNode_pnum);
+    pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
     for (int i = 0; i < 256; i++) {
         pathToNode->fileName[i] = "";
         pathToNode->nodeNumber[i] = -1;
@@ -39,7 +39,7 @@ initPathToNode()
  */
 int get_inode_index(const char* path)
 {
-    pathToNode* pathToNode = (pathToNode*) pages_get_page(sb->pathToNode_pnum);
+    pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
     for (int i = 0; i < 256; i++)
     {
         if (streq(pathToNode->fileName[i], path))
@@ -48,7 +48,8 @@ int get_inode_index(const char* path)
         }
     }
     
-    perror(sprintf("No inode found for given path: %s\n", path));
+    printf("%s ", path);
+    perror("No inode found for given path.");
     return -1;
 }
 
@@ -135,7 +136,7 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
     inode* inode = pages_get_node(index, sb->inodeTable_pnum);
 
     // assign path to inode number
-    pathToNode* pathToNode = (pathToNode*) pages_get_page(sb->pathToNode_pnum);
+    pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
     for (int i = 0; i < 256; i++)
     {
         if (pathToNode->nodeNumber[i] == -1)
@@ -192,7 +193,7 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
 void
 printAll()
 {
-    pathToNode* pathToNode = (pathToNode*) pages_get_page(sb->pathToNode_pnum);
+    pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
     for (int i = 0; i < 256; i++)
     {
         if (pathToNode->nodeNumber[i] != -1)

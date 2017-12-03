@@ -22,8 +22,6 @@ initPathToNode();
 void
 printAll();
 
-inode* retrieve_inode(const char* path);
-
 /**
  * Flags for file data.
  */
@@ -71,6 +69,8 @@ typedef struct superBlock {
     int inodeTable_pnum; // page numeber of the table of 256 inodes
     int pathToNode_pnum; // page number of the mapping of paths to nodes
 } superBlock;
+
+inode* retrieve_inode(const char* path);
 
 void storage_init(void* pages_base);
 int         get_stat(const char* path, struct stat* st);

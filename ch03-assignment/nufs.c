@@ -5,8 +5,8 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <dirent.h>
-#include <bsd/string.h>
 #include <assert.h>
+#include <string.h>
 
 #define FUSE_USE_VERSION 26
 #include <fuse.h>
@@ -136,7 +136,7 @@ nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_fi
         len = size;
     }
 
-    strlcpy(buf, data, len);
+    memcpy(buf, data, len);
     return len;
 }
 
