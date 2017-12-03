@@ -2,6 +2,7 @@
 // Created by Julian Hirn on 11/27/17.
 //
 #include "bmap.h"
+#include "util.h"
 
 bmap createBitMap(void* location) {
         bmap* bmap = (struct bmap* )location;
@@ -48,7 +49,7 @@ int getIntNum(int n)
         if (n < 0 || n > 255) {
                 perror("");
         }
-        return (int)ceil((double) (n * 8 / 256));
+        return (int)ceil(n * 8 / 256);
 }
 
 void clearBit(bmap* bitmap, int i)

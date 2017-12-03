@@ -1,16 +1,6 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
-#include <stdio.h>
-
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <stdlib.h>
-#include "bmap.h"
-#include <math.h>
-#include <time.h>
-
 typedef struct pathToNode {
     const char* fileName[256];
     int nodeNumber[256];

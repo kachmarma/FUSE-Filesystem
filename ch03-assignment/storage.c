@@ -274,22 +274,22 @@ superBlock_init(void* pages_base)
  * @param path ??
  * @return ??
  */
-//static file_data*
-//get_file_data(const char* path) {
+static file_data*
+get_file_data(const char* path) {
 //    for (int ii = 0; 1; ++ii) {
 //        file_data row = file_table[ii];
-//
+
 //        if (file_table[ii].path == 0) {
 //            break;
 //        }
-//
+
 //        if (streq(path, file_table[ii].path)) {
 //            return &(file_table[ii]);
 //        }
 //    }
-//
-//    return 0;
-//}
+
+   return 0;
+}
 
 
 /**
@@ -328,12 +328,12 @@ get_stat(const char* path, struct stat* st)
  * @param path ??
  * @return ??
  */
-//const char*
-//get_data(const char* path)
-//{
-//    file_data* dat = get_file_data(path);
-//    if (!dat) {
-//        return 0;
-//    }
-//    return dat->data;
-//}
+const char*
+get_data(const char* path)
+{
+   file_data* dat = get_file_data(path);
+   if (!dat) {
+       return 0;
+   }
+   return NULL; // TODO fix this
+}
