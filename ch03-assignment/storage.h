@@ -59,17 +59,17 @@ typedef struct indiBlock {
 // represents an inode containing important file data and pointers to data Blocks
 typedef struct inode {
     file_data fileData;                  // contains important file data
-    size_t dataBlockNumber[12];     // assigned directly to data blocks
-    size_t indiBlock[12][12];  // pointer to indirect blocks
+    int dataBlockNumber[12];     // assigned directly to data blocks
+    int indiBlock[12][12];  // pointer to indirect blocks
 } inode;
 
 // contains important file system pointers
 // by default, root inode is the first inode
 typedef struct superBlock {
-    size_t inodeMap_pnum; // page number of bit map of free and used data block
-    size_t dataBlockMap_pnum; // page number of bit map of free and used inodes
-    size_t inodeTable_pnum; // page numeber of the table of 256 inodes
-    size_t pathToNode_pnum; // page number of the mapping of paths to nodes
+    int inodeMap_pnum; // page number of bit map of free and used data block
+    int dataBlockMap_pnum; // page number of bit map of free and used inodes
+    int inodeTable_pnum; // page numeber of the table of 256 inodes
+    int pathToNode_pnum; // page number of the mapping of paths to nodes
 } superBlock;
 
 void storage_init(void* pages_base);

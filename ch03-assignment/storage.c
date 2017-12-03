@@ -5,12 +5,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <assert.h>
 #include <fcntl.h>
-#include <errno.h>
+#include <errno.h> // TODO we might need this
 #include <stdio.h>
 
 #include "storage.h"
+#include "util.h"
 
 const int NUFS_SIZE  = 1024 * 1024; // 1MB
 const int PAGE_COUNT = 256;
@@ -31,6 +31,12 @@ initPathToNode()
     }
 }
 
+/**
+ * Check if two strings are equal.
+ * @param aa first string.
+ * @param bb second string.
+ * @return If the two strings are equal.
+ */
 int get_inode_index(const char* path)
 {
     pathToNode* pathToNode = (pathToNode*) pages_get_page(sb->pathToNode_pnum);
@@ -42,14 +48,14 @@ int get_inode_index(const char* path)
         }
     }
     
-    perror("No inode found for given path: %s\n", path);
+    perror(sprintf("No inode found for given path: %s\n", path));
     return -1;
 }
 
 inode* retrieve_inode(const char* path)
 {
     int inode_index = get_inode_index(path);
-    return pages_get_inode(pathToNode[i], sb->inodeTable_pnum);
+    return pages_get_node(inode_index, sb->inodeTable_pnum);
 }
 
 
@@ -151,7 +157,7 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
 
 
     // figure out size things
-    int pages_needed = ceil(dataSize / PAGE_SIZE);
+    int pages_needed = (int)ceil(dataSize / PAGE_SIZE);
     if (dataSize <= PAGE_SIZE * 12) {
         // use direct pointer(s)
 
@@ -179,6 +185,8 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
             }
         }
     }
+
+    return 0;
 }
 
 void
@@ -200,8 +208,8 @@ void
 print_node(inode* node)
 {
     if (node) {
-        printf("node{refs: %d, mode: %04o, size: %d, xtra: %d}\n",
-               node->ref_count, node->mode, node->dataSize, node->blockCount); 
+        printf("node{refs: %d, mode: %04o, size: %ld, xtra: %d}\n",
+               node->fileData.ref_count, node->fileData.mode, node->fileData.dataSize, node->fileData.blockCount);
     }
     else {
         printf("node{null}\n");
@@ -243,7 +251,7 @@ storage_init(void* pages_base)
     bmap inodeMap = createBitMap(pages_get_page(sb->inodeMap_pnum));
     bmap myDataMap = createBitMap(pages_get_page(sb->dataBlockMap_pnum));
     // create the root inode
-    if (createinode() < 0) {
+    if (createInode("/", 0, 1, 0, 0) < 0) { // TODO fix this
         perror("Failed to create root inode");
     }
 }
@@ -262,38 +270,25 @@ superBlock_init(void* pages_base)
 
 /**
  * idk, TODO what does this do
- * @param aa ??
- * @param bb ??
- * @return ??
- */
-static int
-streq(const char* aa, const char* bb)
-{
-    return strcmp(aa, bb) == 0;
-}
-
-
-/**
- * idk, TODO what does this do
  * @param path ??
  * @return ??
  */
-static file_data*
-get_file_data(const char* path) {
-    for (int ii = 0; 1; ++ii) {
-        file_data row = file_table[ii];
-
-        if (file_table[ii].path == 0) {
-            break;
-        }
-
-        if (streq(path, file_table[ii].path)) {
-            return &(file_table[ii]);
-        }
-    }
-
-    return 0;
-}
+//static file_data*
+//get_file_data(const char* path) {
+//    for (int ii = 0; 1; ++ii) {
+//        file_data row = file_table[ii];
+//
+//        if (file_table[ii].path == 0) {
+//            break;
+//        }
+//
+//        if (streq(path, file_table[ii].path)) {
+//            return &(file_table[ii]);
+//        }
+//    }
+//
+//    return 0;
+//}
 
 
 /**
@@ -332,12 +327,12 @@ get_stat(const char* path, struct stat* st)
  * @param path ??
  * @return ??
  */
-const char*
-get_data(const char* path)
-{
-    file_data* dat = get_file_data(path);
-    if (!dat) {
-        return 0;
-    }
-    return dat->data;
-}
+//const char*
+//get_data(const char* path)
+//{
+//    file_data* dat = get_file_data(path);
+//    if (!dat) {
+//        return 0;
+//    }
+//    return dat->data;
+//}
