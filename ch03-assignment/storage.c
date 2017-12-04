@@ -8,9 +8,12 @@
 #include <fcntl.h>
 #include <errno.h> // TODO we might need this
 #include <stdio.h>
+#include <assert.h>
+#include <time.h>
 
 #include "storage.h"
 #include "util.h"
+#include "bmap.h"
 
 const int NUFS_SIZE  = 1024 * 1024; // 1MB
 const int PAGE_COUNT = 256;

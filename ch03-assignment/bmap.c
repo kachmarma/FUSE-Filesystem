@@ -1,6 +1,8 @@
 //
 // Created by Julian Hirn on 11/27/17.
 //
+#include <stdlib.h>
+#include <stdio.h>
 #include "bmap.h"
 #include "util.h"
 

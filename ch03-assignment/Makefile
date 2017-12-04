@@ -7,7 +7,7 @@ CFLAGS := -g `pkg-config fuse --cflags`
 LDLIBS := `pkg-config fuse --libs` -lbsd
 
 nufs: $(SRCS)
-	gcc $(CFLAGS) -o nufs $(SRCS) $(LDLIBS)
+	gcc $(CFLAGS) -o nufs $(SRCS) -lm $(LDLIBS)
 
 clean: unmount
 	rm -f nufs *.o test.log

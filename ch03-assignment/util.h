@@ -2,6 +2,7 @@
 #define UTIL_H
 
 #include <math.h>
+#include <string.h>
 
 static int
 streq(const char* aa, const char* bb)
@@ -25,12 +26,6 @@ static int
 clamp(int x, int v0, int v1)
 {
     return max(v0, min(x, v1));
-}
-
-static int
-ceil(double x)
-{
-    return (int) ceil(x);
 }
 
 #endif
