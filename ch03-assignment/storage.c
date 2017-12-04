@@ -227,6 +227,7 @@ print_node(inode* node)
 void
 pages_init(const char* path)
 {
+    printf("%s\n", path);
     pages_fd = open(path, O_CREAT | O_RDWR, 0644);
     assert(pages_fd != -1);
 

@@ -10,6 +10,7 @@
 
 #define FUSE_USE_VERSION 26
 #include <fuse.h>
+#include <bsd/string.h>
 
 #include "storage.h"
 
@@ -136,7 +137,7 @@ nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_fi
         len = size;
     }
 
-    memcpy(buf, data, len);
+    strlcpy(buf, data, len);
     return len;
 }
 
@@ -185,7 +186,8 @@ int
 main(int argc, char *argv[])
 {
     assert(argc > 2 && argc < 6);
-    storage_init(argv[--argc]);
+
+    pages_init(argv[--argc]);
     nufs_init_ops(&nufs_ops);
     return fuse_main(argc, argv, &nufs_ops, NULL);
 }
