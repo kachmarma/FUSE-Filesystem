@@ -1,0 +1,31 @@
+Want efficiently stored file names
+
+Cant use const char* becuse cannot store pointers.
+
+Can use fixed length, but then losing the ability to efficiently store file 
+names.
+
+If going to lame out and loose a couple points, can use const char[64]. Do not 
+go smaller. nothing will break with 64.
+
+touch shoud be able to set time to custom value and current time
+
+would be present time if no additional flags to touch command.
+
+the read and write api has this interesting propery the offset is the byte 
+position into your file.
+
+ex. open file. cursor is at 0. write 10 bytes. next call will be at 10 bytes.
+
+
+
+The sylabus says the midnight deadline is hard. However, 1% per hour will be 
+taken until 10PM tomorrow night.
+
+Never return an autograde result after like 6PM tonight on Bottlenose.
+
+
+TODO:
+- Fix bmap
+- Change const char* -> text file
+- 

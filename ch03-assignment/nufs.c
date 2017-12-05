@@ -91,12 +91,15 @@ int
 nufs_unlink(const char *path)
 {
     printf("unlink(%s)\n", path);
+	// remove path from directory... i think
+	// decrement link count... i think
     return -1;
 }
 
 int
 nufs_rmdir(const char *path)
 {
+	// throw error saying must remove all contents first if there is stuff in directory... i think
     printf("rmdir(%s)\n", path);
     return -1;
 }
@@ -114,7 +117,13 @@ int
 nufs_chmod(const char *path, mode_t mode)
 {
     printf("chmod(%s, %04o)\n", path, mode);
-    return -1;
+    inode* inode = retrieve_inode(path);
+	if (inode != NULL) {
+		inode->fileData.mode = mode;
+		return 0;
+	}
+	perror("Inode not found\n");
+	return -ENOENT;
 }
 
 int
