@@ -28,6 +28,11 @@ typedef struct file_data {
     enum myFlag           flag;
 } file_data;
 
+typedef struct pathToNode {
+	char paths[256][64];
+	int inodeNumber[256];
+} pathToNode;
+
 // points to 1024 data Blocks
 typedef struct indiBlock {
     size_t dBlocks[1024];
@@ -45,13 +50,14 @@ typedef struct inode {
 typedef struct superBlock {
     int inodeMap_pnum; // page number of bit map of free and used data block
     int dataBlockMap_pnum; // page number of bit map of free and used inodes
-    int inodeTable_pnum; // page numeber of the table of 256 inodes
-    int pathToNode_pnum; // page number of the mapping of paths to nodes
+	int pathToNode_pnum; // page number of the mapping of paths to nodes  
+  	int inodeTable_pnum; // page numeber of the table of 256 inodes
+   
 } superBlock;
 
 int createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag flag);
 
-void
+int
 initPathToNode();
 
 inode*
@@ -63,7 +69,7 @@ logToFile(const char* path, int index);
 void
 printAll();
 
-
+char* getDataFromNode(inode* inode, off_t offset);
 
 inode* retrieve_inode(const char* path);
 

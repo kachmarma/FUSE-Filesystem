@@ -146,8 +146,10 @@ nufs_open(const char *path, struct fuse_file_info *fi)
 int
 nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
+	inode* node = retrieve_inode(path);
+	
     printf("read(%s, %ld bytes, @%ld)\n", path, size, offset);
-    const char* data = get_data(path);
+    char* data = getDataFromNode(node, offset);
 
     int len = strlen(data) + 1;
     if (size < len) {
@@ -187,7 +189,7 @@ nufs_init_ops(struct fuse_operations* ops)
     ops->mkdir    = nufs_mkdir;
     ops->unlink   = nufs_unlink;
     ops->rmdir    = nufs_rmdir;
-    ops->rename   = nufs_rename;
+	ops->rename   = nufs_rename;
     ops->chmod    = nufs_chmod;
     ops->truncate = nufs_truncate;
     ops->open	  = nufs_open;
