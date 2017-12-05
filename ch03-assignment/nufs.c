@@ -114,7 +114,13 @@ int
 nufs_chmod(const char *path, mode_t mode)
 {
     printf("chmod(%s, %04o)\n", path, mode);
-    return -1;
+    inode* inode = retrieve_inode(path);
+	if (inode != NULL) {
+		inode->fileData.mode = mode;
+		return 0;
+	}
+	perror("Inode not found\n");
+	return -ENOENT;
 }
 
 int
