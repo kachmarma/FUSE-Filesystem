@@ -132,6 +132,8 @@ int
 createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag flag)
 {
     // SCAN inode bitmap
+    printf("Creating inode with path {%s}, mode {%d}, uid: {%d}, size {%ld} and flag {%d}\n",
+    path, mode, uid, dataSize, flag);
     bmap* nodeMap = (bmap*) pages_get_page(sb->inodeTable_pnum);
     int index = setFirstAvailable(nodeMap);
     printf("Index = %d\n", index);
@@ -152,8 +154,10 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
         }
 
         if (i == 255) {
-            perror("Unable to find free location for file");
-            break;
+            perror("Unable to find free location for file\n");
+            // clear bitmap at index
+            clearBit(nodeMap, index);
+            return -1;
         }
 
     }
@@ -259,7 +263,7 @@ storage_init(void* pages_base)
     bmap inodeMap = createBitMap(pages_get_page(sb->inodeMap_pnum));
     bmap myDataMap = createBitMap(pages_get_page(sb->dataBlockMap_pnum));
     // create the root inode
-    if (createInode("/", 0, 1, 0, 0) < 0) { // TODO fix this
+    if (createInode("/", 2, 1, 0, READ_WRITE_EXECUTE) < 0) { // TODO fix this
         perror("Failed to create root inode");
     }
 }
@@ -308,17 +312,21 @@ get_file_data(const char* path) {
 int
 get_stat(const char* path, struct stat* st)
 {
-    
-    inode* node = retrieve_inode(path);
-    if (!node) {
+    int inode_index = get_inode_index(path);
+
+    if (inode_index < 0) {
         return -1;
     }
 
+    inode* node = retrieve_inode(path);
+
     file_data dat = node->fileData;
+
+    printf("Getting file data for path {%s} with inode num %d\n", path, inode_index);
 
     memset(st, 0, sizeof(struct stat));
     st->st_dev = 1;
-    st->st_ino = get_inode_index(path);
+    st->st_ino = inode_index;
     st->st_mode = dat.mode;
     st->st_nlink = dat.ref_count;
     st->st_uid  = dat.uid;
