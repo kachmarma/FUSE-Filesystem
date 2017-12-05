@@ -163,9 +163,9 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
     }
 
     // fill in inode data
-    unsigned long nowTime = (unsigned long) time(NULL);
-    inode->fileData = (file_data) { path, mode, uid, dataSize, nowTime, nowTime, 1, (int) ceil(dataSize / 4096), flag };
-
+    inode->fileData = (file_data) { path, mode, uid, dataSize, 0, 0, 1, (int) ceil(dataSize / 4096), flag };
+	clock_gettime(CLOCK_REALTIME, inode->fileData.createTime);
+	clock_gettime(CLOCK_REALTIME, inode->fileData.modTime);
 
     // figure out size things
     int pages_needed = (int)ceil(dataSize / PAGE_SIZE);
@@ -199,6 +199,16 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
 	printAll();	
     return 0;
 }
+
+int
+storage_set_time(const char* path, const struct timespec ts[2])
+{
+	inode* inode = retrieve_inode(path);
+	inode->fileData.modTime[0] = ts[0];
+	inode->fileData.modTime[1] = ts[1];
+	return 0;
+}
+
 
 void
 printAll()

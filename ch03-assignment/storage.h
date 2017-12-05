@@ -32,8 +32,8 @@ typedef struct file_data {
     int                   mode;
     int                   uid;
     size_t                dataSize;
-    unsigned long         createTime;
-    unsigned long         modTime;
+    struct timespec       createTime[2];
+    struct timespec       modTime[2];
     int                   ref_count;
     int                   blockCount;
     enum myFlag           flag;
@@ -60,6 +60,8 @@ typedef struct superBlock {
     int pathToNode_pnum; // page number of the mapping of paths to nodes
 } superBlock;
 
+int createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag flag);
+
 inode* retrieve_inode(const char* path);
 
 void storage_init(void* pages_base);
@@ -67,6 +69,8 @@ int         get_stat(const char* path, struct stat* st);
 const char* get_data(const char* path);
 
 superBlock* superBlock_init(void* position);
+
+int storage_set_time(const char* path, const struct timespec ts[2]);
 
 void   pages_init(const char* path);
 void   pages_free();

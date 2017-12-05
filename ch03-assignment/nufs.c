@@ -7,6 +7,8 @@
 #include <dirent.h>
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define FUSE_USE_VERSION 26
 #include <fuse.h>
@@ -81,7 +83,8 @@ int
 nufs_mkdir(const char *path, mode_t mode)
 {
     printf("mkdir(%s)\n", path);
-    return -1;
+	nufs_mknod(path, 0040000, 1);
+    return 0;
 }
 
 int
@@ -128,7 +131,10 @@ int
 nufs_open(const char *path, struct fuse_file_info *fi)
 {
     printf("open(%s)\n", path);
-    return 0;
+	struct stat* st = malloc(sizeof(struct stat));
+    int rv = nufs_getattr(path, st);
+	free(st);
+	return rv;
 }
 
 // Actually read data
@@ -159,8 +165,7 @@ nufs_write(const char *path, const char *buf, size_t size, off_t offset, struct 
 int
 nufs_utimens(const char* path, const struct timespec ts[2])
 {
-    //int rv = storage_set_time(path, ts); TODO
-    int rv = -1;
+    int rv = storage_set_time(path, ts);
     printf("utimens(%s, [%ld, %ld; %ld %ld]) -> %d\n",
            path, ts[0].tv_sec, ts[0].tv_nsec, ts[1].tv_sec, ts[1].tv_nsec, rv);
 	return rv;
