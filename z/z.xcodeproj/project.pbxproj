@@ -1,0 +1,88 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXFileReference section */
+		8B38EBE81FD71C0E009C11B8 /* bmap.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = bmap.c; path = "../ch03-assignment/bmap.c"; sourceTree = "<group>"; };
+		8B38EBE91FD71C0E009C11B8 /* storage.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = storage.c; path = "../ch03-assignment/storage.c"; sourceTree = "<group>"; };
+		8B38EBEA1FD71C0E009C11B8 /* storage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = storage.h; path = "../ch03-assignment/storage.h"; sourceTree = "<group>"; };
+		8B38EBEB1FD71C0E009C11B8 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; name = Makefile; path = "../ch03-assignment/Makefile"; sourceTree = "<group>"; };
+		8B38EBEC1FD71C0E009C11B8 /* util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = util.h; path = "../ch03-assignment/util.h"; sourceTree = "<group>"; };
+		8B38EBED1FD71C0E009C11B8 /* test.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; name = test.pl; path = "../ch03-assignment/test.pl"; sourceTree = "<group>"; };
+		8B38EBEE1FD71C0F009C11B8 /* bmap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = bmap.h; path = "../ch03-assignment/bmap.h"; sourceTree = "<group>"; };
+		8B38EBEF1FD71C0F009C11B8 /* nufs.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = nufs.c; path = "../ch03-assignment/nufs.c"; sourceTree = "<group>"; };
+		8B38EBF01FD71C36009C11B8 /* bmap_test.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = bmap_test.c; path = "../ch03-assignment/bmap_test.c"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		8B38EBE11FD71BFC009C11B8 = {
+			isa = PBXGroup;
+			children = (
+				8B38EBF01FD71C36009C11B8 /* bmap_test.c */,
+				8B38EBE81FD71C0E009C11B8 /* bmap.c */,
+				8B38EBEE1FD71C0F009C11B8 /* bmap.h */,
+				8B38EBEB1FD71C0E009C11B8 /* Makefile */,
+				8B38EBEF1FD71C0F009C11B8 /* nufs.c */,
+				8B38EBE91FD71C0E009C11B8 /* storage.c */,
+				8B38EBEA1FD71C0E009C11B8 /* storage.h */,
+				8B38EBED1FD71C0E009C11B8 /* test.pl */,
+				8B38EBEC1FD71C0E009C11B8 /* util.h */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		8B38EBE21FD71BFC009C11B8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0910;
+			};
+			buildConfigurationList = 8B38EBE51FD71BFC009C11B8 /* Build configuration list for PBXProject "z" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 8B38EBE11FD71BFC009C11B8;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		8B38EBE61FD71BFC009C11B8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		8B38EBE71FD71BFC009C11B8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8B38EBE51FD71BFC009C11B8 /* Build configuration list for PBXProject "z" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8B38EBE61FD71BFC009C11B8 /* Debug */,
+				8B38EBE71FD71BFC009C11B8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8B38EBE21FD71BFC009C11B8 /* Project object */;
+}
