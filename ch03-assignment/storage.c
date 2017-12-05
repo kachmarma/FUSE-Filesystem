@@ -27,7 +27,6 @@ superBlock* sb;
 void
 initPathToNode()
 {
-	printf("%d\n", sb->pathToNode_pnum);
     pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
     for (int i = 0; i < 256; i++) {
         pathToNode->fileName[i] = "";
@@ -134,15 +133,12 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
     // SCAN inode bitmap
     printf("Creating inode with path {%s}, mode {%d}, uid: {%d}, size {%ld} and flag {%d}\n",
     path, mode, uid, dataSize, flag);
-	printf("Bitmap page: %d\n", pages_get_page(sb->inodeTable_pnum));
-	printf("sb->inodeTable_pnum: %d\n", sb->inodeTable_pnum);
-    bmap* nodeMap = (struct bmap*) pages_get_page(sb->inodeTable_pnum);
+
+    bmap* nodeMap = (struct bmap*) pages_get_page(sb->inodeMap_pnum);
     int index = setFirstAvailable(nodeMap);
-	printBitMap(nodeMap);
-	int test = setFirstAvailable(nodeMap);
+	printf("Bitmap page: %d\n", pages_get_page(sb->inodeMap_pnum));
 	printBitMap(nodeMap);
     printf("Index = %d\n", index);
-	printf("Test index = %d\n", test);
 	if (index < 0) {
         perror("No free inodes");
     }
@@ -201,8 +197,7 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
                 left--;
             }
         }
-    }
-	printAll();	
+    }	
     return 0;
 }
 
@@ -263,7 +258,6 @@ pages_init(const char* path)
     assert(pages_base != MAP_FAILED);
     // stages init
     storage_init(pages_base);
-	initPathToNode();
 }
 
 /**
@@ -280,8 +274,9 @@ storage_init(void* pages_base)
     sb->pathToNode_pnum = 4;
     bmap inodeMap = createBitMap(pages_get_page(sb->inodeMap_pnum));
     bmap myDataMap = createBitMap(pages_get_page(sb->dataBlockMap_pnum));
+	initPathToNode();
     // create the root inode
-    if (createInode("/", 2, 1, 0, READ_WRITE_EXECUTE) < 0) { // TODO fix this
+    if (createInode("/", 0040000, 1, 0, READ_WRITE_EXECUTE) < 0) { // TODO fix this
         perror("Failed to create root inode");
     }
 }
