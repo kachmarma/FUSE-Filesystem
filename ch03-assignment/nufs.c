@@ -66,6 +66,8 @@ int
 nufs_mknod(const char *path, mode_t mode, dev_t rdev)
 {
     printf("mknod(%s, %04o)\n", path, mode);
+	printf("Is this a file: %d\n", S_ISREG(mode));
+	printf("Is this a directory: %d\n", S_ISDIR(mode));
 	if (createInode(path, mode, 1, 0, 6) < 0) {
 		perror("no pls");
 		return -1;
