@@ -27,6 +27,7 @@ superBlock* sb;
 void
 initPathToNode()
 {
+	printf("%d\n", sb->pathToNode_pnum);
     pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
     for (int i = 0; i < 256; i++) {
         pathToNode->fileName[i] = "";
@@ -51,8 +52,8 @@ int get_inode_index(const char* path)
         }
     }
     
-    printf("%s ", path);
-    perror("No inode found for given path.");
+    printf("Get inode index: %s\n", path);
+    perror("No inode found for given path.\n");
     return -1;
 }
 
@@ -133,7 +134,8 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
     // SCAN inode bitmap
     bmap* nodeMap = (bmap*) pages_get_page(sb->inodeTable_pnum);
     int index = setFirstAvailable(nodeMap);
-    if (index < 0) {
+    printf("Index = %d\n", index);
+	if (index < 0) {
         perror("No free inodes");
     }
     inode* inode = pages_get_node(index, sb->inodeTable_pnum);
@@ -146,6 +148,7 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
         {
             pathToNode->nodeNumber[i] = index;
             pathToNode->fileName[i] = strdup(path);
+			break;
         }
 
         if (i == 255) {
@@ -201,7 +204,7 @@ printAll()
     {
         if (pathToNode->nodeNumber[i] != -1)
         {
-            printf("%s", pathToNode->fileName[i]);
+            printf("%s\n", pathToNode->fileName[i]);
             print_node(pages_get_node(pathToNode->nodeNumber[i], sb->inodeTable_pnum));
         }
     }
@@ -237,8 +240,8 @@ pages_init(const char* path)
     pages_base = mmap(0, NUFS_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, pages_fd, 0);
     assert(pages_base != MAP_FAILED);
     // stages init
-    initPathToNode();
     storage_init(pages_base);
+	initPathToNode();
 }
 
 /**
@@ -248,7 +251,7 @@ pages_init(const char* path)
 void
 storage_init(void* pages_base)
 {
-    *sb = superBlock_init(pages_base);
+    sb = superBlock_init(pages_base);
     sb->inodeMap_pnum = 1;
     sb->dataBlockMap_pnum = 2;
     sb->inodeTable_pnum = 3;
@@ -266,11 +269,11 @@ storage_init(void* pages_base)
  * @param pages_base The pointer to the beginning of the file system.
  * @return
  */
-superBlock
+superBlock*
 superBlock_init(void* pages_base)
 {
     superBlock *sb = (superBlock *)pages_base;
-    return *sb;
+    return sb;
 }
 
 /**
@@ -317,10 +320,10 @@ get_stat(const char* path, struct stat* st)
     st->st_dev = 1;
     st->st_ino = get_inode_index(path);
     st->st_mode = dat.mode;
-    st->st_nlink = -1; // TODO update this.
+    st->st_nlink = dat.ref_count;
     st->st_uid  = dat.uid;
     st->st_gid = dat.uid;
-    st->st_rdev = -1;
+    st->st_rdev = 1;
     st->st_size = dat.dataSize;
     st->st_blksize = PAGE_SIZE;
     st->st_blocks = dat.blockCount;

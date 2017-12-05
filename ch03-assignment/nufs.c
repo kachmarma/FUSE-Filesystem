@@ -29,7 +29,7 @@ nufs_access(const char *path, int mask)
 int
 nufs_getattr(const char *path, struct stat *st)
 {
-    printf("getattr(%s)\n", path);
+   // printf("getattr(%s)\n", path);
     int rv = get_stat(path, st);
     if (rv == -1) {
         return -ENOENT;

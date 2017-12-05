@@ -66,7 +66,7 @@ void storage_init(void* pages_base);
 int         get_stat(const char* path, struct stat* st);
 const char* get_data(const char* path);
 
-superBlock superBlock_init(void* position);
+superBlock* superBlock_init(void* position);
 
 void   pages_init(const char* path);
 void   pages_free();
