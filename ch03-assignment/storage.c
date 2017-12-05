@@ -196,22 +196,24 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
             }
         }
     }
-
+	printAll();	
     return 0;
 }
 
 void
 printAll()
 {
-    pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
-    for (int i = 0; i < 256; i++)
-    {
-        if (pathToNode->nodeNumber[i] != -1)
-        {
-            printf("%s\n", pathToNode->fileName[i]);
-            print_node(pages_get_node(pathToNode->nodeNumber[i], sb->inodeTable_pnum));
-        }
-    }
+//    pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
+//    for (int i = 0; i < 256; i++)
+//    {
+//        if (pathToNode->nodeNumber[i] != -1)
+//        {
+//            printf("%s\n", pathToNode->fileName[i]);
+//            print_node(pages_get_node(pathToNode->nodeNumber[i], sb->inodeTable_pnum));
+//        }
+//    }
+	
+	printBitMap((struct bmap*) pages_get_page(sb->inodeMap_pnum));
 }
 
 // TODO
