@@ -51,14 +51,10 @@ nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
     printf("readdir(%s)\n", path);
 
-    get_stat("/", &st);
+    get_stat(path, &st);
     // filler is a callback that adds one item to the result
     // it will return non-zero when the buffer is full
     filler(buf, ".", &st, 0);
-
-    get_stat("/hello.txt", &st);
-    filler(buf, "hello.txt", &st, 0);
-
     return 0;
 }
 
