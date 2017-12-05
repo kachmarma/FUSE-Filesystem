@@ -69,7 +69,7 @@ void printBitMap(bmap* bitmap)
 {
   for(int i = 0; i < 8; i++) {
     for(int z = 31; z >= 0; z--) {
-      printf("%ld", getBit(bitmap->data[i], z));
+      printf("%d", getBit(bitmap->data[i], z));
     }
   }
 }

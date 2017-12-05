@@ -134,9 +134,11 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
     // SCAN inode bitmap
     printf("Creating inode with path {%s}, mode {%d}, uid: {%d}, size {%ld} and flag {%d}\n",
     path, mode, uid, dataSize, flag);
-    bmap* nodeMap = (bmap*) pages_get_page(sb->inodeTable_pnum);
+    bmap* nodeMap = (struct bmap*) pages_get_page(sb->inodeTable_pnum);
     int index = setFirstAvailable(nodeMap);
+	int test = setFirstAvailable(nodeMap);
     printf("Index = %d\n", index);
+	printf("Test index = %d\n", test);
 	if (index < 0) {
         perror("No free inodes");
     }
