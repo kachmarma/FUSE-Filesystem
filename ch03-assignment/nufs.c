@@ -91,12 +91,15 @@ int
 nufs_unlink(const char *path)
 {
     printf("unlink(%s)\n", path);
+	// remove path from directory... i think
+	// decrement link count... i think
     return -1;
 }
 
 int
 nufs_rmdir(const char *path)
 {
+	// throw error saying must remove all contents first if there is stuff in directory... i think
     printf("rmdir(%s)\n", path);
     return -1;
 }
