@@ -27,11 +27,8 @@ superBlock* sb;
 void
 initPathToNode()
 {
-    pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
-    for (int i = 0; i < 256; i++) {
-        pathToNode->fileName[i] = "";
-        pathToNode->nodeNumber[i] = -1;
-    }
+	int idx = 0;
+	inode* inode = create_inode_literal("/.fsdata", 0100000, 1, PAGE_SIZE * 4, NO_PERMISSION, &idx);
 }
 
 /**
@@ -42,7 +39,7 @@ initPathToNode()
  */
 int get_inode_index(const char* path)
 {
-    pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
+ /*   pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
     for (int i = 0; i < 256; i++)
     {
         if (streq(pathToNode->fileName[i], path))
@@ -54,6 +51,8 @@ int get_inode_index(const char* path)
     printf("Get inode index: %s\n", path);
     perror("No inode found for given path.\n");
     return -1;
+ */
+	return 0;
 }
 
 inode* retrieve_inode(const char* path)
@@ -61,6 +60,8 @@ inode* retrieve_inode(const char* path)
     int inode_index = get_inode_index(path);
     return pages_get_node(inode_index, sb->inodeTable_pnum);
 }
+
+
 
 
 /**
@@ -115,55 +116,24 @@ pages_find_empty()
     return pnum;
 }
 
-// mode:
-//  0 = directory
-//  1 = file
-/**
- * Create a new inode for a file with the given arguments.
- * @param path The path of the file.
- * @param mode The mode of the file (directory or file)
- * @param uid The id of the user.
- * @param dataSize The size of the file.
- * @param flag The flags for the file.
- * @return idk, TODO The index of the newly created inode or if the operation was successful?
- */
-int
-createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag flag)
+inode* create_inode_literal(const char* path, int mode, int uid, size_t dataSize, enum myFlag flag, int* outIndex)
 {
-    // SCAN inode bitmap
+	  // SCAN inode bitmap
     printf("Creating inode with path {%s}, mode {%d}, uid: {%d}, size {%ld} and flag {%d}\n",
     path, mode, uid, dataSize, flag);
 
     bmap* nodeMap = (struct bmap*) pages_get_page(sb->inodeMap_pnum);
     int index = setFirstAvailable(nodeMap);
-	printf("Bitmap page: %d\n", pages_get_page(sb->inodeMap_pnum));
+	printf("Bitmap page: %p\n", pages_get_page(sb->inodeMap_pnum));
 	printBitMap(nodeMap);
     printf("Index = %d\n", index);
 	if (index < 0) {
         perror("No free inodes");
     }
-    inode* inode = pages_get_node(index, sb->inodeTable_pnum);
+	*outIndex = index;
 
-    // assign path to inode number
-    pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
-    for (int i = 0; i < 256; i++)
-    {
-        if (pathToNode->nodeNumber[i] == -1)
-        {
-            pathToNode->nodeNumber[i] = index;
-            pathToNode->fileName[i] = strdup(path);
-			break;
-        }
-
-        if (i == 255) {
-            perror("Unable to find free location for file\n");
-            // clear bitmap at index
-            clearBit(nodeMap, index);
-            return -1;
-        }
-
-    }
-
+	inode* inode = pages_get_node(index, sb->inodeTable_pnum);
+	
     // fill in inode data
     inode->fileData = (file_data) { path, mode, uid, dataSize, 0, 0, 1, (int) ceil(dataSize / 4096), flag };
 	clock_gettime(CLOCK_REALTIME, inode->fileData.createTime);
@@ -197,7 +167,61 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
                 left--;
             }
         }
-    }	
+    }
+
+	printBitMap((struct bmap*) pages_get_page(sb->dataBlockMap_pnum));
+
+    return inode;
+}
+
+int
+logToFile(const char* path, int index)
+{
+	// TODO
+	/*
+	for (int i = 0; i < 256; i++)
+    {
+        if (pathToNode->nodeNumber[i] == -1)
+        {
+            pathToNode->nodeNumber[i] = index;
+            pathToNode->fileName[i] = strdup(path);
+			break;
+        }
+
+        if (i == 255) {
+            perror("Unable to find free location for file\n");
+            // clear bitmap at index
+            clearBit(nodeMap, index);
+            return -1;
+        }
+
+    }
+	*/
+}
+
+// mode:
+//  0 = directory
+//  1 = file
+/**
+ * Create a new inode for a file with the given arguments.
+ * @param path The path of the file.
+ * @param mode The mode of the file (directory or file)
+ * @param uid The id of the user.
+ * @param dataSize The size of the file.
+ * @param flag The flags for the file.
+ * @return idk, TODO The index of the newly created inode or if the operation was successful?
+ */
+int
+createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag flag)
+{
+	int index = 0;
+    inode* inode = create_inode_literal(path, mode, uid, dataSize, flag, &index);
+
+    // assign path to inode number
+//    pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
+
+	logToFile(path, index);
+ 	
     return 0;
 }
 
@@ -274,11 +298,12 @@ storage_init(void* pages_base)
     sb->pathToNode_pnum = 4;
     bmap inodeMap = createBitMap(pages_get_page(sb->inodeMap_pnum));
     bmap myDataMap = createBitMap(pages_get_page(sb->dataBlockMap_pnum));
-	initPathToNode();
     // create the root inode
-    if (createInode("/", 0040000, 1, 0, READ_WRITE_EXECUTE) < 0) { // TODO fix this
+	int idx = 0;
+    if (create_inode_literal("/", 0040000, 1, 0, READ_WRITE_EXECUTE, &idx) < 0) { // TODO log root if necessary
         perror("Failed to create root inode");
     }
+	initPathToNode();
 }
 
 /**

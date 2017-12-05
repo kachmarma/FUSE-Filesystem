@@ -1,17 +1,6 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
-typedef struct pathToNode {
-    const char* fileName[256];
-    int nodeNumber[256];
-} pathToNode;
-
-void
-initPathToNode();
-
-void
-printAll();
-
 /**
  * Flags for file data.
  */
@@ -61,6 +50,20 @@ typedef struct superBlock {
 } superBlock;
 
 int createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag flag);
+
+void
+initPathToNode();
+
+inode*
+create_inode_literal(const char* path, int mode, int uid, size_t dataSize, enum myFlag flag, int* outIndex);
+
+int
+logToFile(const char* path, int index);
+
+void
+printAll();
+
+
 
 inode* retrieve_inode(const char* path);
 
