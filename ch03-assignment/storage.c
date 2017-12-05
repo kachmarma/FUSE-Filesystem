@@ -82,7 +82,7 @@ pages_free()
 void*
 pages_get_page(int pnum)
 {
-    return pages_base + 4096 * pnum;
+    return (void*) (pages_base + 4096 * pnum);
 }
 
 /**
@@ -134,9 +134,13 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
     // SCAN inode bitmap
     printf("Creating inode with path {%s}, mode {%d}, uid: {%d}, size {%ld} and flag {%d}\n",
     path, mode, uid, dataSize, flag);
+	printf("Bitmap page: %d\n", pages_get_page(sb->inodeTable_pnum));
+	printf("sb->inodeTable_pnum: %d\n", sb->inodeTable_pnum);
     bmap* nodeMap = (struct bmap*) pages_get_page(sb->inodeTable_pnum);
     int index = setFirstAvailable(nodeMap);
+	printBitMap(nodeMap);
 	int test = setFirstAvailable(nodeMap);
+	printBitMap(nodeMap);
     printf("Index = %d\n", index);
 	printf("Test index = %d\n", test);
 	if (index < 0) {
