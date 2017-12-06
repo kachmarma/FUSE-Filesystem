@@ -167,8 +167,14 @@ nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_fi
 {
 	inode* node = retrieve_inode(path);	
     printf("read(%s, %ld bytes, @%ld)\n", path, size, offset);
-    int rv = getDataFromNode(node, buf, offset, size);
-    return size;
+    int dataRead = getDataFromNode(node, buf, offset, size);
+    
+	int len = strlen(buf);
+	if (size < len) {
+		len = size;
+	}
+	printf("READ LENGTH: %d\n", len);
+	return len;
 }
 
 // Actually write data

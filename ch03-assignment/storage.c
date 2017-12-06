@@ -285,7 +285,8 @@ getDataFromNode(inode* inode, char* buf, off_t offset, size_t size)
     {
 		printf("Page I am trying to read from: %d\n", inode->dataBlockNumber[0] + 90);
         memcpy(buf, pages_get_data(inode->dataBlockNumber[0]) + offset, size);
-        return 0;
+      	buf[strlen(buf)] = '\0'; 
+		return size;
     }
     
 	// TODO use offset
@@ -503,10 +504,16 @@ storage_unlink(const char* path)
 	{
 		if (streq(pathToNode->paths[i], path))
 		{
+			// clear path to node num directory
 			inode* inode = retrieve_inode(path);
-			strcpy(pathToNode->paths[i], "");
 			int iNodeNumber = pathToNode->inodeNumber[i];
 			pathToNode->inodeNumber[i] = -1;
+			strcpy(pathToNode->paths[i], "");
+			// decrement ref count
+			inode->fileData.ref_count -= 1;
+//			if (inode->fileData.ref_count <= 0)
+//			{
+//			int iNodeNumber = pathToNode->inodeNumber[i];	
 			clearBit((struct bmap*) pages_get_page(sb->inodeMap_pnum), iNodeNumber);
 			bmap* dataBlockMap = (struct bmap*) pages_get_page(sb->dataBlockMap_pnum);
 			if (inode->fileData.blockCount <= 12)
@@ -529,6 +536,7 @@ storage_unlink(const char* path)
 				}
 				
 			}
+//			}
 			return 0;
 		}
 	}
