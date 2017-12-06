@@ -165,18 +165,10 @@ nufs_open(const char *path, struct fuse_file_info *fi)
 int
 nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-	inode* node = retrieve_inode(path);
-	
+	inode* node = retrieve_inode(path);	
     printf("read(%s, %ld bytes, @%ld)\n", path, size, offset);
-    char* data = getDataFromNode(node, offset);
-
-    int len = strlen(data) + 1;
-    if (size < len) {
-        len = size;
-    }
-
-    strlcpy(buf, data, len);
-    return len;
+    int rv = getDataFromNode(node, buf, offset, size);
+    return size;
 }
 
 // Actually write data
@@ -186,7 +178,7 @@ nufs_write(const char *path, const char *buf, size_t size, off_t offset, struct 
 	int rv = storage_write_data(path, buf, size, offset);
     printf("write(%s, %ld bytes, @%ld)\n", path, size, offset);
 	// TODO: Bad cases for write / appropriate errno.
-    return rv;
+    return size;
 }
 
 // Update the timestamps on a file or directory.

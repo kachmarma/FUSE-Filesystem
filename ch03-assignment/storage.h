@@ -68,7 +68,7 @@ logToFile(const char* path, int index);
 void
 printAll();
 
-char* getDataFromNode(inode* inode, off_t offset);
+int getDataFromNode(inode* inode, char* buf, off_t offset, size_t size);
 
 inode* retrieve_inode(const char* path);
 

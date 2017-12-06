@@ -98,6 +98,12 @@ pages_get_node(int node_id, int pnum)
     return &(idx[node_id]);
 }
 
+void*
+pages_get_data(int data_page_num)
+{
+    return pages_get_page(data_page_num + 90);
+}
+
 /**
  * Finds an empty page for data.
  * @return The index of the empty page. -1 if no empty pages are available.
@@ -271,9 +277,17 @@ void storage_read_dir(const char* path, void *buf, struct stat* st, fuse_fill_di
 	}
 }
 
-char*
-getDataFromNode(inode* inode, off_t offset)
+int
+getDataFromNode(inode* inode, char* buf, off_t offset, size_t size)
 {
+	// short-circuit case
+    if (inode->fileData.dataSize <= 4096)
+    {
+		printf("Page I am trying to read from: %d\n", inode->dataBlockNumber[0] + 90);
+        memcpy(buf, pages_get_data(inode->dataBlockNumber[0]) + offset, size);
+        return 0;
+    }
+    
 	// TODO use offset
 	int buffer_size = inode->fileData.dataSize;
 	char* buff[inode->fileData.blockCount * 4096];
@@ -569,11 +583,20 @@ storage_rmdir(const char* path)
 	storage_unlink(path);
 }
 
+
 int
 storage_write_data(const char* path, const char* buf, size_t size, off_t offset)
 {
     // get inode for path
     inode* inode = retrieve_inode(path);
+   
+	inode->fileData.dataSize = size;
+ 
+    if (size == 0)
+    {
+        printf("Writing 0 bytes to file at path %s\n", path);
+        return 0;
+    }
     
     // check for invalid write sizes
     if (size < 0 || size > inode->fileData.dataSize)
@@ -585,18 +608,27 @@ storage_write_data(const char* path, const char* buf, size_t size, off_t offset)
     // get block for offset
     int blockOffset = offset / 4096;
     int numberBlockWrites = ceil(size / 4096);
+
+	// the short-circuit case    
+    if (size <= 4096)
+    {
+		printf("Page I am trying to write to: %d\n", inode->dataBlockNumber[0] + 90);
+        strlcpy(pages_get_data(inode->dataBlockNumber[0]), buf, size);
+        return 0;
+    }
     
     // case for small (<12 block) file
     if (inode->fileData.blockCount <= 12)
     {
         // write for first block
-        void* startWrite = pages_get_page(4 + blockOffset + inode->dataBlockNumber[0]); // usuable data blocks start at 4
-        strlcpy(startWrite, buf, 4096 - (offset % 4096));
+        strlcpy(pages_get_data(blockOffset + inode->dataBlockNumber[0]) + offset, buf, min(size, 4096 - (offset % 4096)));
+        
+        size -= 4096;
         
         // write from 2..(n-1)
         for (int ii = 1; ii < numberBlockWrites - 1; ii++)
         {
-            strlcpy(pages_get_page(4 + blockOffset + inode->dataBlockNumber[ii]), buf + 4096 * ii, 4096);
+            strlcpy(pages_get_data(blockOffset + inode->dataBlockNumber[ii]), buf + 4096 * ii, 4096);
         }
         
         // write for (n)
