@@ -511,8 +511,8 @@ storage_unlink(const char* path)
 			strcpy(pathToNode->paths[i], "");
 			// decrement ref count
 			inode->fileData.ref_count -= 1;
-//			if (inode->fileData.ref_count <= 0)
-//			{
+			if (inode->fileData.ref_count <= 0)
+			{
 //			int iNodeNumber = pathToNode->inodeNumber[i];	
 			clearBit((struct bmap*) pages_get_page(sb->inodeMap_pnum), iNodeNumber);
 			bmap* dataBlockMap = (struct bmap*) pages_get_page(sb->dataBlockMap_pnum);
@@ -536,7 +536,7 @@ storage_unlink(const char* path)
 				}
 				
 			}
-//			}
+			}
 			return 0;
 		}
 	}
