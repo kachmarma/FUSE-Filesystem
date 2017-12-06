@@ -375,6 +375,73 @@ storage_shrink(inode* inode, size_t inode_size, off_t size)
 	return 0;
 }
 
+int
+storage_expand(inode* inode, size_t inode_size, off_t size) {
+        int pages_needed = (int)ceil(size / PAGE_SIZE) - inode->fileData.blockCount;
+		if (size >= 1024 * 1000)
+		{
+			perror("Trying to expand to bigger size than filesystem allows\n");
+			return -1;
+		}
+        // add data blocks or redirect to indirect
+        if (size > (PAGE_SIZE * 12))
+        {
+            // already using indirect -> assigning more indirect
+            if (inode->fileData.blockCount > 12)
+            {
+                // just assign more indirect
+                for (int ii = inode->fileData.blockCount; ii < pages_needed; ii++)
+                {
+                    int firstAvailable = setFirstAvailable(pages_get_page(sb->dataBlockMap_pnum));
+                    if (firstAvailable < 1)
+                    {
+                        perror("No more free data blocks for file expand with truncate\n");
+                        return -1;
+                    }   
+                    writeToIndirectPointerBlock(inode, ii, firstAvailable);
+                }
+            }
+			else // not using indirect yet -> copying direct to indirect and assigning more indirect
+			{
+            // copy over data from direct block to first direct block in indirect block and clear direct block
+            for (int ii = 0; ii < inode->fileData.blockCount; ii++)
+            {
+                inode->indiBlock[0][ii] = inode->dataBlockNumber[ii];
+                inode->dataBlockNumber[ii] = 0;
+            }
+            // allocate extra space
+            for (int ii = inode->fileData.blockCount; ii < pages_needed; ii++)
+            {
+                int firstAvailable = setFirstAvailable(pages_get_page(sb->dataBlockMap_pnum));
+                if (firstAvailable < 1)
+                {
+                    perror("No more free data blocks for file expand with truncate\n");
+                    return -1;
+                }
+                writeToIndirectPointerBlock(inode, ii, firstAvailable);
+            }
+        }
+    } else
+    {
+        // use direct and assign more direct blocks
+        for (int ii = inode->fileData.blockCount; ii < pages_needed + inode->fileData.blockCount; ii++)
+        {
+            int firstAvailable = setFirstAvailable(pages_get_page(sb->dataBlockMap_pnum));
+            if (firstAvailable < 1)
+            {
+                perror("No more free data blocks for file expand with truncate\n");
+                return -1;
+            }
+            inode->dataBlockNumber[ii] = firstAvailable;
+        }
+    }
+	// change size in fileData to requested size
+	inode->fileData.dataSize = size;
+	// update BlockCount
+	inode->fileData.blockCount = pages_needed;
+	return 0;
+}
+
 void
 storage_truncate(const char* path, off_t size)
 {

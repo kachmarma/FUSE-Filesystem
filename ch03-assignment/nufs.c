@@ -82,7 +82,18 @@ int
 nufs_mkdir(const char *path, mode_t mode)
 {
     printf("mkdir(%s)\n", path);
-	nufs_mknod(path, 0040000, 1);
+	nufs_mknod(path, 0040664, 1);
+	
+	/*
+	char* dotPath = malloc(64);
+	strcpy(dotPath, path);
+	dotPath[strlen(path)] = ".";
+	dotPath[strlen(path) + 1] = '\0';
+
+	int index = get_inode_index(path);	
+	logToFile(dotPath, index);
+	printf("path {%s} index {%d}\n", path, index);
+	*/
     return 0;
 }
 

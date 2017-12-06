@@ -59,6 +59,8 @@ typedef struct superBlock {
 
 int createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag flag);
 
+int get_inode_index(const char* path);
+
 int
 initPathToNode();
 
