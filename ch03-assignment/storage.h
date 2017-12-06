@@ -90,6 +90,6 @@ inode* pages_get_node(int node_id, int pnum);
 int    pages_find_empty();
 void   print_node(inode* node);
 
-void storage_read_dir(const char* path, void *buf, fuse_fill_dir_t filler);
-
+void storage_read_dir(const char* path, void *buf, struct stat* st, fuse_fill_dir_t filler);
+void storage_truncate(const char* path, off_t size);
 #endif

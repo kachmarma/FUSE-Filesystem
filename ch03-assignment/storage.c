@@ -224,11 +224,11 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
     return 0;
 }
 
-void storage_read_dir(const char* path, void *buf, fuse_fill_dir_t filler)
+void storage_read_dir(const char* path, void *buf, struct stat* st, fuse_fill_dir_t filler)
 {
 	pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
 	int path_length = strlen(path);
-	for (int i = 0; i < 256; i++)
+	for (int i = 1; i < 256; i++)
 	{
 		if (pathToNode->inodeNumber[i] != -1)
 		{
@@ -259,10 +259,10 @@ void storage_read_dir(const char* path, void *buf, fuse_fill_dir_t filler)
 			
 			if (valid == 1)
 			{
-			 struct stat st;
-			 get_stat(path, &st);
-				
-			 filler(buf, path, &st, 0);	
+			 str = str + path_length;
+			 str[strlen(str)] = '\0';
+			 printf("Valid path: %s\n", str);
+			 filler(buf, str, NULL, 0);	
 			}
 			
 			}
@@ -312,6 +312,62 @@ storage_set_time(const char* path, const struct timespec ts[2])
 	inode->fileData.modTime[0] = ts[0];
 	inode->fileData.modTime[1] = ts[1];
 	return 0;
+}
+
+void
+storage_truncate(const char* path, off_t size)
+{
+	// get inode
+	inode* inode = retrieve_inode(path);
+	// get inode size
+	size_t inode_size = inode->fileData.dataSize;
+	
+	if (inode_size == size)
+	{
+		return;
+	}
+
+	// condition for expand
+	if (inode_size < size)
+	{
+
+
+		// add data blocks or redirect to indirect		
+		if (size > (PAGE_SIZE * 12))
+		{
+			// using indirect
+			if (inode->fileData.blockCount > 12)
+			{
+				// just assign more indirect
+				 int pages_needed = (int)ceil(size / PAGE_SIZE) - inode->fileData.blockCount;
+				 int left = pages_needed;
+       			 int outterBlocks = (int) (ceil(pages_needed / 12));
+       			 for (int i = 0; i < outterBlocks; i++) {
+           			 for (int z = 0; z < min(12, left); z++) {
+               		 int mapEntry = setFirstAvailable(pages_get_page(sb->dataBlockMap_pnum));
+               		 if (mapEntry < 0) {
+                   		 perror("No free data blocks.");
+               		 }
+               		 inode->indiBlock[i][z] = mapEntry;
+               		 left--;
+           		 }
+      	  }	
+			} else 
+			{
+				// copy over data and use indirect
+				
+			}
+		} else
+		{
+			// use direct and assign more direct blocks
+				
+		}
+		
+	} else // condition for shrink
+	{
+		 
+	}
+
 }
 
 
@@ -384,6 +440,10 @@ storage_init(void* pages_base)
     if (createInode("/", 0040000, 1, 0, READ_WRITE_EXECUTE) < 0) { // TODO log root if necessary
         perror("Failed to create root inode");
     }
+	
+	pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
+//	logToFile("/.", 0);
+//	logToFile("/..", 0); 
 }
 
 /**

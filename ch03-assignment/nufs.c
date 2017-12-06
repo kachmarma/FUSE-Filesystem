@@ -54,10 +54,10 @@ nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     get_stat(path, &st);
     // filler is a callback that adds one item to the result
     // it will return non-zero when the buffer is full
-    filler(buf, ".", &st, 0);
-
-	storage_read_dir(path, buf, filler);
-
+    filler(buf, ".", NULL, 0);
+	filler(buf, "..", NULL, 0);
+	storage_read_dir(path, buf, &st, filler);
+	
     return 0;
 }
 
@@ -129,7 +129,8 @@ int
 nufs_truncate(const char *path, off_t size)
 {
     printf("truncate(%s, %ld bytes)\n", path, size);
-    return -1;
+   	storage_truncate(path, size);
+	return -1;
 }
 
 // this is called on open, but doesn't need to do much
