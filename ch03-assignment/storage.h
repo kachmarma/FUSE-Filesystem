@@ -1,6 +1,8 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
+#include <fuse.h>
+
 /**
  * Flags for file data.
  */
@@ -87,5 +89,7 @@ void*  pages_get_page(int pnum);
 inode* pages_get_node(int node_id, int pnum);
 int    pages_find_empty();
 void   print_node(inode* node);
+
+void storage_read_dir(const char* path, void *buf, fuse_fill_dir_t filler);
 
 #endif

@@ -42,21 +42,19 @@ initPathToNode()
  * @return If the two strings are equal.
  */
 int get_inode_index(const char* path)
-{
- /*   pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
+{	
+    printf("Get inode index: %s\n", path);
+	pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
     for (int i = 0; i < 256; i++)
     {
-        if (streq(pathToNode->fileName[i], path))
+        if (streq(pathToNode->paths[i], path))
         {
             return i;
         }
     }
     
-    printf("Get inode index: %s\n", path);
     perror("No inode found for given path.\n");
     return -1;
- */
-	return 0;
 }
 
 inode* retrieve_inode(const char* path)
@@ -225,6 +223,55 @@ createInode(const char* path, int mode, int uid, size_t dataSize, enum myFlag fl
  	
     return 0;
 }
+
+void storage_read_dir(const char* path, void *buf, fuse_fill_dir_t filler)
+{
+	pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
+	int path_length = strlen(path);
+	for (int i = 0; i < 256; i++)
+	{
+		if (pathToNode->inodeNumber[i] != -1)
+		{
+			char* str = pathToNode->paths[i];
+			if (!(strlen(str) < path_length))
+			{
+			int valid = 1;
+			
+			int z = 0;
+			for (z; z < path_length; z++)
+			{
+				if(str[z] != str[z])
+				{
+					valid = 0;
+					break;
+				}
+			}
+
+			int q = z + 1;
+			for (q; q < strlen(str); q++)
+			{
+				if (str[q] == '/' && (q != (strlen(str) - 1)))
+				{
+					valid = 0;
+					break;
+				}
+			}
+			
+			if (valid == 1)
+			{
+			 struct stat st;
+			 get_stat(path, &st);
+				
+			 filler(buf, path, &st, 0);	
+			}
+			
+			}
+		}
+	}
+}
+
+
+
 
 char*
 getDataFromNode(inode* inode, off_t offset)

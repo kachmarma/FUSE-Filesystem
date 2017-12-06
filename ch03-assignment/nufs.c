@@ -31,7 +31,7 @@ nufs_access(const char *path, int mask)
 int
 nufs_getattr(const char *path, struct stat *st)
 {
-   // printf("getattr(%s)\n", path);
+    printf("getattr(%s)\n", path);
     int rv = get_stat(path, st);
     if (rv == -1) {
         return -ENOENT;
@@ -55,6 +55,9 @@ nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     // filler is a callback that adds one item to the result
     // it will return non-zero when the buffer is full
     filler(buf, ".", &st, 0);
+
+	storage_read_dir(path, buf, filler);
+
     return 0;
 }
 
