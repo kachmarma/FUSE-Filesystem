@@ -389,7 +389,7 @@ storage_expand(inode* inode, size_t inode_size, off_t size) {
             // already using indirect -> assigning more indirect
             if (inode->fileData.blockCount > 12)
             {
-                // just assign more indirect
+               // just assign more indirect
                 for (int ii = inode->fileData.blockCount; ii < pages_needed; ii++)
                 {
                     int firstAvailable = setFirstAvailable(pages_get_page(sb->dataBlockMap_pnum));
@@ -462,10 +462,22 @@ storage_truncate(const char* path, off_t size)
 	} else // condition for shrink
 	{
 		 storage_shrink(inode, inode_size, size);
+	}	
+}
+
+int
+storage_move(const char* from, const char* to)
+{
+	pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
+	for (int i = 1; i < 256; i++)
+	{
+		if (streq(pathToNode->paths[i], from))
+		{
+			strcpy(pathToNode->paths[i], to);
+			return 0;
+		}
 	}
-
-
-	
+	return -ENOENT;
 }
 
 

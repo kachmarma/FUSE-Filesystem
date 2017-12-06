@@ -120,7 +120,8 @@ int
 nufs_rename(const char *from, const char *to)
 {
     printf("rename(%s => %s)\n", from, to);
-    return -1;
+    int rv = storage_move(from, to);
+	return rv;
 }
 
 int

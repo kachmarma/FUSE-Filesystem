@@ -94,4 +94,5 @@ void   print_node(inode* node);
 
 void storage_read_dir(const char* path, void *buf, struct stat* st, fuse_fill_dir_t filler);
 void storage_truncate(const char* path, off_t size);
+int storage_move(const char* from, const char* to);
 #endif
