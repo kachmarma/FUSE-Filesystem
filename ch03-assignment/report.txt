@@ -1,0 +1,55 @@
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+Report
+Julian Hirn and Matthew Kachmar
+
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+
+Part 1: Evaluation
+
+1) The way we store the path strings to inode is currently being done with two arrays, one containing the char* pathName and the other containing the corresponding inode for that path. If we had more time we would have implemented this using B-Trees the same way its done in ext4. In the current state we are unable to have arbitrarily long file/path names. We would probably have been able to use a better solution from this if we had started of by implementing the writing and reading to files but since that took us much longer to implement we ended up writing most of our logic using the previously outlined data structure.
+2) The way we implemented our inode data pointers (which are actually page offsets numbers from the start of the data blocks in the file system) allows for large files since the direct block gives us almost 50k data and the indirect block gives us another of 590k. If the file system was larger we would have added more indirect or even doubly indirect pointers. The drawback of having the possibility of such large files is that it takes up more space by itself and since “the average file” is small that might be considered a misuse of possibly valuable space. It isn’t that bad in this case.
+3) We would have liked to spend more time planning and implementing more functionality related to permission since they are a very important aspect of a filesystem. Since we only considered the design for a single user we didn’t really think much about security which we could have used to add more in-depth functionality to the file system. We also didn’t consider multi-threaded use which would make debugging harder but would also be more adapted to the use cases of a real file system with concurrent access.
+3) We had planned to use longs for our bitmaps instead of 8 ints since that could result in a (very) slight performance gain but the increase in efficiency would have been negligible.
+4) If we had more time we would have liked to add journaling in order to handle fuse or computer crashes in order to enable contingency. However, we also don’t think that it would be feasible or efficient to make a CoW filesystem since the disk space is limited to only 1MB.
+
+
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+
+Part 2: Checklist
+
+Checklist:
+=======================================================================================
+“Simple”:								     Completion:
+---------------------------------------------------------------------------------------
+Create files.									[done]
+---------------------------------------------------------------------------------------
+List the files in the filesystem root directory (where you mounted it).		[done]
+---------------------------------------------------------------------------------------
+Write to small files (under 4k).						[done]
+---------------------------------------------------------------------------------------
+Read from small files (under 4k).						[done]
+---------------------------------------------------------------------------------------
+Delete files.									[done]
+---------------------------------------------------------------------------------------
+Rename files. 									[done]
+---------------------------------------------------------------------------------------
+
+===============================================================================================
+Extended:								           Completion:
+-----------------------------------------------------------------------------------------------
+Create hard links - multiple names for the same file blocks.			[not completed - logic for removing files only when no hard link
+										 in storage unlink.]
+-----------------------------------------------------------------------------------------------
+Read and write from files larger than one block. 				[attempted - logic in getDataFromNode for
+										 reading and storage_write_data for write.]
+-----------------------------------------------------------------------------------------------
+Create directories and nested directories. 					[partially - We can create subdirectories
+										 but we can’t list files in subdirectories]
+-----------------------------------------------------------------------------------------------
+Directory depth should only be limited by space.				[not completed - Limited by structure for keeping file names (Array)]
+-----------------------------------------------------------------------------------------------
+Remove directories.								[done - can remove empty directories using rm -r]
+-----------------------------------------------------------------------------------------------
+Support metadata (permissions and timestamps) for files and directories.	[partially - timestamps are added to files
+										 created and changed, permissions always set to 664]
+-----------------------------------------------------------------------------------------------
