@@ -324,7 +324,7 @@ storage_shrink(inode* inode, size_t inode_size, off_t size)
 {	
 	int pages_needed = (int) ceil(size / PAGE_SIZE) - inode->fileData.blockCount;	
 
-	if (inode->fileData.blockCount < 12)
+	if (inode->fileData.blockCount <= 12)
 	{
 		// set less direct blocks
 		for (int i = pages_needed; i < inode->fileData.blockCount; i++)
@@ -334,7 +334,7 @@ storage_shrink(inode* inode, size_t inode_size, off_t size)
 		}
 	}
 	else {
-		if (pages_needed < 12) // going from indirect to direct, must copy data over
+		if (pages_needed <= 12) // going from indirect to direct, must copy data over
 		{
 			for (int i = 0; i < pages_needed; i++)
 			{
