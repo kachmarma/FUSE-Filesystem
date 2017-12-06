@@ -130,6 +130,7 @@ nufs_truncate(const char *path, off_t size)
 {
     printf("truncate(%s, %ld bytes)\n", path, size);
    	storage_truncate(path, size);
+	// update time?
 	return -1;
 }
 

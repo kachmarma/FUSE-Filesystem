@@ -270,9 +270,6 @@ void storage_read_dir(const char* path, void *buf, struct stat* st, fuse_fill_di
 	}
 }
 
-
-
-
 char*
 getDataFromNode(inode* inode, off_t offset)
 {
