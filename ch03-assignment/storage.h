@@ -92,4 +92,5 @@ void storage_truncate(const char* path, off_t size);
 int storage_move(const char* from, const char* to);
 int storage_unlink(const char* path);
 int storage_rmdir(const char* path);
+int storage_write_data(const char* path, const char* buf, size_t size, off_t offset);
 #endif

@@ -183,8 +183,10 @@ nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_fi
 int
 nufs_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
+	int rv = storage_write_data(path, buf, size, offset);
     printf("write(%s, %ld bytes, @%ld)\n", path, size, offset);
-    return -1;
+	// TODO: Bad cases for write / appropriate errno.
+    return rv;
 }
 
 // Update the timestamps on a file or directory.

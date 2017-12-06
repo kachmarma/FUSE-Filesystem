@@ -6,10 +6,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <errno.h> // TODO we might need this
+#include <errno.h>
 #include <stdio.h>
 #include <assert.h>
 #include <time.h>
+#include <bsd/string.h>
 
 #include "storage.h"
 #include "util.h"
@@ -566,6 +567,46 @@ storage_rmdir(const char* path)
 	}
 	// can safely ulink directory because it contains no subdirectories or subfiles
 	storage_unlink(path);
+}
+
+int
+storage_write_data(const char* path, const char* buf, size_t size, off_t offset)
+{
+    // get inode for path
+    inode* inode = retrieve_inode(path);
+    
+    // check for invalid write sizes
+    if (size < 0 || size > inode->fileData.dataSize)
+    {
+      //  perror("Invalid write size");
+      //  return -1;
+    }
+    
+    // get block for offset
+    int blockOffset = offset / 4096;
+    int numberBlockWrites = ceil(size / 4096);
+    
+    // case for small (<12 block) file
+    if (inode->fileData.blockCount <= 12)
+    {
+        // write for first block
+        void* startWrite = pages_get_page(4 + blockOffset + inode->dataBlockNumber[0]); // usuable data blocks start at 4
+        strlcpy(startWrite, buf, 4096 - (offset % 4096));
+        
+        // write from 2..(n-1)
+        for (int ii = 1; ii < numberBlockWrites - 1; ii++)
+        {
+            strlcpy(pages_get_page(4 + blockOffset + inode->dataBlockNumber[ii]), buf + 4096 * ii, 4096);
+        }
+        
+        // write for (n)
+        strlcpy(pages_get_page(4 + blockOffset + inode->dataBlockNumber[numberBlockWrites]), buf + 4096 * numberBlockWrites, offset);
+    	return 0;
+	}
+    
+    // large file (>12 block)
+    printf("TRYING TO WRITE FILE >12 block, need to implement\n");
+    return -1;
 }
 
 
