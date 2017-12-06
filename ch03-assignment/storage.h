@@ -35,11 +35,6 @@ typedef struct pathToNode {
 	int inodeNumber[256];
 } pathToNode;
 
-// points to 1024 data Blocks
-typedef struct indiBlock {
-    size_t dBlocks[1024];
-} indiBlock;
-
 // represents an inode containing important file data and pointers to data Blocks
 typedef struct inode {
     file_data fileData;                  // contains important file data
@@ -95,4 +90,5 @@ void   print_node(inode* node);
 void storage_read_dir(const char* path, void *buf, struct stat* st, fuse_fill_dir_t filler);
 void storage_truncate(const char* path, off_t size);
 int storage_move(const char* from, const char* to);
+int storage_unlink(const char* path);
 #endif

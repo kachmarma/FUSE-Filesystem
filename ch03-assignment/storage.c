@@ -480,6 +480,46 @@ storage_move(const char* from, const char* to)
 	return -ENOENT;
 }
 
+int
+storage_unlink(const char* path)
+{
+	pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
+	for (int i = 1; i < 256; i++)
+	{
+		if (streq(pathToNode->paths[i], path))
+		{
+			inode* inode = retrieve_inode(path);
+			strcpy(pathToNode->paths[i], "");
+			int iNodeNumber = pathToNode->inodeNumber[i];
+			pathToNode->inodeNumber[i] = -1;
+			clearBit((struct bmap*) pages_get_page(sb->inodeMap_pnum), iNodeNumber);
+			bmap* dataBlockMap = (struct bmap*) pages_get_page(sb->dataBlockMap_pnum);
+			if (inode->fileData.blockCount <= 12)
+			{
+				for (int i = 0; i < inode->fileData.blockCount; i++)
+				{
+					clearBit(dataBlockMap, inode->dataBlockNumber[i]);
+				}
+			}
+			else
+			{
+				int numBlocks = inode->fileData.blockCount;
+				int left = numBlocks;
+				int outter_loop = ceil(numBlocks / 12);
+				for (int i = 0; i < outter_loop; i++) {
+					for (int z = 0; z < min(left, 12); z++) {
+						left--;
+						clearBit(dataBlockMap, inode->indiBlock[i][z]);
+					}
+				}
+				
+			}
+			return 0;
+		}
+	}
+	return -ENOENT;
+}
+
 
 void
 printAll()

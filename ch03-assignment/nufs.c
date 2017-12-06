@@ -102,8 +102,9 @@ nufs_unlink(const char *path)
 {
     printf("unlink(%s)\n", path);
 	// remove path from directory... i think
-	// decrement link count... i think
-    return -1;
+	int rv = storage_unlink(path);
+	// decrement link count... i think //TODO come back for hardlink impl
+    return rv;
 }
 
 int
