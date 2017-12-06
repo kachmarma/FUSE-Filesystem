@@ -520,6 +520,54 @@ storage_unlink(const char* path)
 	return -ENOENT;
 }
 
+int
+storage_rmdir(const char* path)
+{
+	pathToNode* pathToNode = (struct pathToNode*) pages_get_page(sb->pathToNode_pnum);
+	int path_length = strlen(path);
+	for (int i = 1; i < 256; i++)
+	{
+		if (pathToNode->inodeNumber[i] != -1)
+		{
+			char* str = pathToNode->paths[i];
+			if (!(strlen(str) < path_length))
+			{
+			int valid = 1;
+			
+			int z = 0;
+			for (z; z < path_length; z++)
+			{
+				if(str[z] != str[z])
+				{
+					valid = 0;
+					break;
+				}
+			}
+
+			int q = z + 1;
+			for (q; q < strlen(str); q++)
+			{
+				if (str[q] == '/' && (q != (strlen(str) - 1)))
+				{
+					valid = 0;
+					break;
+				}
+			}
+			
+			if (valid == 1)
+			{
+				if (!streq(path, str))	{
+					// directory contains files/directory
+					return -EEXIST;
+				}
+			}
+			}
+		}
+	}
+	// can safely ulink directory because it contains no subdirectories or subfiles
+	storage_unlink(path);
+}
+
 
 void
 printAll()

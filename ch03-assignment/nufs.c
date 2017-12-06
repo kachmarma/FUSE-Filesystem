@@ -111,8 +111,9 @@ int
 nufs_rmdir(const char *path)
 {
 	// throw error saying must remove all contents first if there is stuff in directory... i think
+	int rv = storage_rmdir(path);
     printf("rmdir(%s)\n", path);
-    return -1;
+    return rv;
 }
 
 // implements: man 2 rename

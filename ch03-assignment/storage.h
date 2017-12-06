@@ -91,4 +91,5 @@ void storage_read_dir(const char* path, void *buf, struct stat* st, fuse_fill_di
 void storage_truncate(const char* path, off_t size);
 int storage_move(const char* from, const char* to);
 int storage_unlink(const char* path);
+int storage_rmdir(const char* path);
 #endif
