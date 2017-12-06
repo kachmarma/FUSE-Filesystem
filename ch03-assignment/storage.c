@@ -314,6 +314,70 @@ storage_set_time(const char* path, const struct timespec ts[2])
 	return 0;
 }
 
+int
+writeToIndirectPointerBlock(inode* node, int pblock_num, int val)
+{
+	int retVal = node->indiBlock[pblock_num / 12][(pblock_num % 12)];
+	node->indiBlock[pblock_num / 12][(pblock_num % 12)] = val;
+	return retVal;
+}
+
+int
+storage_shrink(inode* inode, size_t inode_size, off_t size)
+{	
+	int pages_needed = (int) ceil(size / PAGE_SIZE) - inode->fileData.blockCount;	
+
+	if (inode->fileData.blockCount < 12)
+	{
+		// set less direct blocks
+		for (int i = pages_needed; i < inode->fileData.blockCount; i++)
+		{
+			clearBit((struct bmap*) pages_get_page(sb->dataBlockMap_pnum), inode->dataBlockNumber[i]);
+			inode->dataBlockNumber[i] = 0;
+		}
+	}
+	else {
+		if (pages_needed < 12) // going from indirect to direct, must copy data over
+		{
+			for (int i = 0; i < pages_needed; i++)
+			{
+				inode->dataBlockNumber[i] = inode->indiBlock[0][i];
+			}
+
+			int z = 0;
+			if (pages_needed != 0)
+			{
+				z = 1;
+			}
+			for (z; z < 12; z++)
+			{
+				for (int x = 0; x < 12; x++)
+				{
+					if (inode->indiBlock[z][x] != 0)
+					{
+						clearBit((struct bmap*) pages_get_page(sb->dataBlockMap_pnum), inode->indiBlock[z][x]);
+						inode->indiBlock[z][x] = 0;
+					}
+				}
+			}
+		}
+		else // going from indirect to less indirect
+		{
+			for (int i = pages_needed; i < inode->fileData.blockCount; i++)
+			{
+				int bitmapNumber = writeToIndirectPointerBlock(inode, i, 0);
+				clearBit((struct bmap*) pages_get_page(sb->dataBlockMap_pnum), bitmapNumber);
+			}
+		}
+	}
+
+	// change size in fileData to requested size
+	inode->fileData.dataSize = size;
+	// update BlockCount
+	inode->fileData.blockCount = pages_needed;
+	return 0;
+}
+
 void
 storage_truncate(const char* path, off_t size)
 {
@@ -329,45 +393,15 @@ storage_truncate(const char* path, off_t size)
 
 	// condition for expand
 	if (inode_size < size)
-	{
-
-
-		// add data blocks or redirect to indirect		
-		if (size > (PAGE_SIZE * 12))
-		{
-			// using indirect
-			if (inode->fileData.blockCount > 12)
-			{
-				// just assign more indirect
-				 int pages_needed = (int)ceil(size / PAGE_SIZE) - inode->fileData.blockCount;
-				 int left = pages_needed;
-       			 int outterBlocks = (int) (ceil(pages_needed / 12));
-       			 for (int i = 0; i < outterBlocks; i++) {
-           			 for (int z = 0; z < min(12, left); z++) {
-               		 int mapEntry = setFirstAvailable(pages_get_page(sb->dataBlockMap_pnum));
-               		 if (mapEntry < 0) {
-                   		 perror("No free data blocks.");
-               		 }
-               		 inode->indiBlock[i][z] = mapEntry;
-               		 left--;
-           		 }
-      	  }	
-			} else 
-			{
-				// copy over data and use indirect
-				
-			}
-		} else
-		{
-			// use direct and assign more direct blocks
-				
-		}
-		
+	{	
+	
 	} else // condition for shrink
 	{
-		 
+		 storage_shrink(inode, inode_size, size);
 	}
 
+
+	
 }
 
 
